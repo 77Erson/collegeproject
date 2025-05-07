@@ -5,10 +5,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import BlogPage from "./pages/BlogPage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import DashboardLayout from "./pages/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import StudentsPage from "./pages/StudentsPage";
@@ -22,23 +26,30 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          
-          {/* App Routes */}
-          <Route path="/app" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="students" element={<StudentsPage />} />
-            {/* Additional app routes would go here */}
-          </Route>
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            
+            {/* Protected App Routes */}
+            <Route path="/app" element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="students" element={<StudentsPage />} />
+              {/* Additional app routes would go here */}
+            </Route>
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

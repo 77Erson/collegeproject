@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -29,12 +31,31 @@ const Navbar = () => {
             <Link to="/" className="px-3 py-2 text-gray-700 hover:text-brand-500">Home</Link>
             <Link to="/blog" className="px-3 py-2 text-gray-700 hover:text-brand-500">Blog</Link>
             <Link to="/about" className="px-3 py-2 text-gray-700 hover:text-brand-500">About</Link>
-            <Link to="/app">
-              <Button variant="outline" className="ml-4">Dashboard</Button>
-            </Link>
-            <Link to="/login">
-              <Button className="bg-brand-500 hover:bg-brand-600">Login</Button>
-            </Link>
+            
+            {user ? (
+              <>
+                <Link to="/app">
+                  <Button variant="outline" className="ml-4">Dashboard</Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  className="flex gap-2 items-center" 
+                  onClick={signOut}
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/register">
+                  <Button variant="outline" className="ml-4">Register</Button>
+                </Link>
+                <Link to="/login">
+                  <Button className="bg-brand-500 hover:bg-brand-600">Login</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -74,20 +95,45 @@ const Navbar = () => {
             >
               About
             </Link>
-            <Link
-              to="/app"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-500"
-              onClick={toggleMenu}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/login"
-              className="block px-3 py-2 mt-4 rounded-md text-base font-medium bg-brand-500 text-white hover:bg-brand-600"
-              onClick={toggleMenu}
-            >
-              Login
-            </Link>
+            
+            {user ? (
+              <>
+                <Link
+                  to="/app"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-500"
+                  onClick={toggleMenu}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    signOut();
+                    toggleMenu();
+                  }}
+                  className="flex w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-500"
+                >
+                  <LogOut size={16} className="mr-2" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/register"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-500"
+                  onClick={toggleMenu}
+                >
+                  Register
+                </Link>
+                <Link
+                  to="/login"
+                  className="block px-3 py-2 mt-4 rounded-md text-base font-medium bg-brand-500 text-white hover:bg-brand-600"
+                  onClick={toggleMenu}
+                >
+                  Login
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

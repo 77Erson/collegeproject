@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LoginFormData {
   email: string;
@@ -19,18 +20,25 @@ const LoginPage = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log('Login attempt:', data);
+  const onSubmit = async (data: LoginFormData) => {
+    const { error } = await signIn(data.email, data.password);
     
-    // For demo purposes, we'll just simulate successful login
-    // In a real app, you would call an authentication API
-    toast({
-      title: "Login successful",
-      description: "You have been logged in successfully.",
-    });
-    
-    navigate('/app');
+    if (error) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid email or password. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Login successful",
+        description: "You have been logged in successfully.",
+      });
+      
+      navigate('/app');
+    }
   };
 
   return (
@@ -103,8 +111,8 @@ const LoginPage = () => {
               </Button>
               <p className="mt-4 text-center text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link to="/" className="font-medium text-brand-500 hover:text-brand-400">
-                  Request access
+                <Link to="/register" className="font-medium text-brand-500 hover:text-brand-400">
+                  Register
                 </Link>
               </p>
             </CardFooter>
