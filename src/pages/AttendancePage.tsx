@@ -17,14 +17,10 @@ interface AttendanceRecord {
   id: string;
   date: string;
   status: 'present' | 'absent' | 'late';
-  student: {
-    name: string;
-    roll_no: string;
-    student_id: string;
-  };
-  class: {
-    name: string;
-  };
+  student_name: string;
+  student_roll_no: string;
+  student_id: string;
+  class_name: string;
 }
 
 interface ClassOption {
@@ -52,20 +48,17 @@ const AttendancePage = () => {
     },
   });
 
-  // Fetch attendance records
+  // Fetch attendance records with joined data
   const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery({
     queryKey: ['attendance', selectedClass, activeTab, selectedDate],
     queryFn: async () => {
-      let query = supabase
-        .from('attendance')
-        .select(`
-          id,
-          date,
-          status,
-          students!inner(name, roll_no, student_id),
-          classes!inner(name)
-        `)
-        .eq('classes.teacher_id', user?.id);
+      let query = supabase.from('attendance').select(`
+        id,
+        date,
+        status,
+        class_id,
+        student_id
+      `);
 
       if (selectedClass) {
         query = query.eq('class_id', selectedClass);
@@ -76,23 +69,61 @@ const AttendancePage = () => {
         query = query.eq('date', dateStr);
       }
 
-      const { data, error } = await query;
+      const { data: attendanceData, error: attendanceError } = await query;
         
-      if (error) throw error;
+      if (attendanceError) throw attendanceError;
       
-      return data.map(record => ({
-        id: record.id,
-        date: record.date,
-        status: record.status,
-        student: {
-          name: record.students.name,
-          roll_no: record.students.roll_no,
-          student_id: record.students.student_id,
-        },
-        class: {
-          name: record.classes.name,
-        }
-      })) as AttendanceRecord[];
+      // If there's no attendance data, return empty array
+      if (!attendanceData || attendanceData.length === 0) {
+        return [];
+      }
+      
+      // Get unique student IDs and class IDs from attendance records
+      const studentIds = [...new Set(attendanceData.map(record => record.student_id))];
+      const classIds = [...new Set(attendanceData.map(record => record.class_id))];
+      
+      // Fetch student details
+      const { data: studentsData, error: studentsError } = await supabase
+        .from('students')
+        .select('id, name, roll_no, student_id')
+        .in('id', studentIds);
+        
+      if (studentsError) throw studentsError;
+      
+      // Fetch class details
+      const { data: classesData, error: classesError } = await supabase
+        .from('classes')
+        .select('id, name')
+        .in('id', classIds);
+        
+      if (classesError) throw classesError;
+      
+      // Map students and classes to their IDs for easy lookup
+      const studentMap = (studentsData || []).reduce((acc, student) => {
+        acc[student.id] = student;
+        return acc;
+      }, {} as Record<string, any>);
+      
+      const classMap = (classesData || []).reduce((acc, cls) => {
+        acc[cls.id] = cls;
+        return acc;
+      }, {} as Record<string, any>);
+      
+      // Combine all data into one structure
+      return attendanceData.map(record => {
+        const student = studentMap[record.student_id] || {};
+        const cls = classMap[record.class_id] || {};
+        
+        return {
+          id: record.id,
+          date: record.date,
+          status: record.status,
+          student_name: student.name || 'Unknown Student',
+          student_roll_no: student.roll_no || 'N/A',
+          student_id: student.student_id || 'N/A',
+          class_name: cls.name || 'Unknown Class'
+        };
+      }) as AttendanceRecord[];
     },
     enabled: !!user?.id,
   });
@@ -120,7 +151,7 @@ const AttendancePage = () => {
                   <SelectValue placeholder="Select class" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Classes</SelectItem>
+                  <SelectItem value="all">All Classes</SelectItem>
                   {classes.map(cls => (
                     <SelectItem key={cls.id} value={cls.id}>
                       {cls.name}
@@ -186,9 +217,9 @@ const AttendancePage = () => {
                   <TableBody>
                     {attendanceRecords.map((record) => (
                       <TableRow key={record.id}>
-                        <TableCell>{record.student.name}</TableCell>
-                        <TableCell>{record.student.roll_no}</TableCell>
-                        <TableCell>{record.class.name}</TableCell>
+                        <TableCell>{record.student_name}</TableCell>
+                        <TableCell>{record.student_roll_no}</TableCell>
+                        <TableCell>{record.class_name}</TableCell>
                         <TableCell>{format(new Date(record.date), 'PP')}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs ${
