@@ -16,6 +16,9 @@ import RegisterPage from "./pages/RegisterPage";
 import DashboardLayout from "./pages/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import StudentsPage from "./pages/StudentsPage";
+import AttendancePage from "./pages/AttendancePage";
+import ClassesPage from "./pages/ClassesPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +46,9 @@ const App = () => (
             }>
               <Route index element={<Dashboard />} />
               <Route path="students" element={<StudentsPage />} />
+              <Route path="attendance" element={<AttendancePage />} />
+              <Route path="classes" element={<ClassesPage />} />
+              <Route path="settings" element={<SettingsPage />} />
               {/* Additional app routes would go here */}
             </Route>
             

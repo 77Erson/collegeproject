@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface StudentFormProps {
   onSubmit: (data: StudentFormData) => void;
   initialData?: StudentFormData;
+  isLoading?: boolean;
 }
 
 export interface StudentFormData {
@@ -21,7 +23,7 @@ export interface StudentFormData {
   profileImage?: File | null;
 }
 
-const StudentForm = ({ onSubmit, initialData }: StudentFormProps) => {
+const StudentForm = ({ onSubmit, initialData, isLoading = false }: StudentFormProps) => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm<StudentFormData>({
     defaultValues: initialData || {
       name: '',
@@ -35,11 +37,6 @@ const StudentForm = ({ onSubmit, initialData }: StudentFormProps) => {
 
   const handleFormSubmit = (data: StudentFormData) => {
     onSubmit(data);
-    toast({
-      title: initialData ? "Student Updated" : "Student Added",
-      description: `${data.name} has been ${initialData ? 'updated' : 'added'} successfully.`,
-      variant: "default",
-    });
     if (!initialData) {
       reset();
     }
@@ -64,6 +61,7 @@ const StudentForm = ({ onSubmit, initialData }: StudentFormProps) => {
                 id="name" 
                 {...register('name', { required: "Name is required" })} 
                 placeholder="John Doe" 
+                disabled={isLoading}
               />
               {errors.name && <span className="text-sm text-red-500">{errors.name.message}</span>}
             </div>
@@ -81,6 +79,7 @@ const StudentForm = ({ onSubmit, initialData }: StudentFormProps) => {
                   }
                 })} 
                 placeholder="john.doe@example.com" 
+                disabled={isLoading}
               />
               {errors.email && <span className="text-sm text-red-500">{errors.email.message}</span>}
             </div>
@@ -93,6 +92,7 @@ const StudentForm = ({ onSubmit, initialData }: StudentFormProps) => {
                 id="studentId" 
                 {...register('studentId', { required: "Student ID is required" })} 
                 placeholder="STU12345" 
+                disabled={isLoading}
               />
               {errors.studentId && <span className="text-sm text-red-500">{errors.studentId.message}</span>}
             </div>
@@ -103,6 +103,7 @@ const StudentForm = ({ onSubmit, initialData }: StudentFormProps) => {
                 id="rollNo" 
                 {...register('rollNo', { required: "Roll number is required" })} 
                 placeholder="A12" 
+                disabled={isLoading}
               />
               {errors.rollNo && <span className="text-sm text-red-500">{errors.rollNo.message}</span>}
             </div>
@@ -116,15 +117,25 @@ const StudentForm = ({ onSubmit, initialData }: StudentFormProps) => {
               accept="image/*" 
               {...register('profileImage', { 
                 required: initialData ? false : "Profile image is required for facial recognition"
-              })} 
+              })}
+              disabled={isLoading}
             />
             {errors.profileImage && <span className="text-sm text-red-500">{errors.profileImage.message}</span>}
           </div>
         </CardContent>
         
         <CardFooter className="flex justify-between">
-          <Button type="button" variant="outline" onClick={() => reset()}>Reset</Button>
-          <Button type="submit">{initialData ? 'Update Student' : 'Add Student'}</Button>
+          <Button type="button" variant="outline" onClick={() => reset()} disabled={isLoading}>Reset</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {initialData ? 'Updating...' : 'Adding...'}
+              </>
+            ) : (
+              initialData ? 'Update Student' : 'Add Student'
+            )}
+          </Button>
         </CardFooter>
       </form>
     </Card>

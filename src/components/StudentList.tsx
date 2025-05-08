@@ -4,15 +4,16 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from '@/components/ui/button';
 import { StudentFormData } from './StudentForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Trash2, User } from 'lucide-react';
+import { Edit, Trash2, User, Loader2 } from 'lucide-react';
 
 interface StudentListProps {
   students: StudentFormData[];
   onEdit: (student: StudentFormData) => void;
   onDelete: (studentId: string) => void;
+  isLoading?: boolean;
 }
 
-const StudentList = ({ students, onEdit, onDelete }: StudentListProps) => {
+const StudentList = ({ students, onEdit, onDelete, isLoading = false }: StudentListProps) => {
   return (
     <Card>
       <CardHeader>
@@ -31,7 +32,16 @@ const StudentList = ({ students, onEdit, onDelete }: StudentListProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.length === 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  <div className="flex flex-col items-center justify-center text-gray-500">
+                    <Loader2 className="h-12 w-12 mb-2 animate-spin" />
+                    <p>Loading students...</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : students.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-gray-500">
