@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { Google } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 interface RegisterFormData {
   firstName: string;
@@ -22,7 +24,7 @@ interface RegisterFormData {
 const RegisterPage = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>();
   const { toast } = useToast();
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const password = watch('password');
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -54,6 +56,10 @@ const RegisterPage = () => {
         description: "Please check your email to verify your account.",
       });
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    await signInWithGoogle();
   };
 
   return (
@@ -145,12 +151,32 @@ const RegisterPage = () => {
                   <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
                 )}
               </div>
-            </CardContent>
-            <CardFooter className="flex flex-col">
+
               <Button type="submit" className="w-full bg-brand-500 hover:bg-brand-600">
                 Register
               </Button>
-              <p className="mt-4 text-center text-sm text-gray-600">
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-gray-50 px-2 text-muted-foreground">Or continue with</span>
+                </div>
+              </div>
+
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleGoogleSignIn}
+              >
+                <Google className="mr-2 h-4 w-4" />
+                Sign up with Google
+              </Button>
+            </CardContent>
+            <CardFooter className="flex flex-col">
+              <p className="text-center text-sm text-gray-600">
                 Already have an account?{' '}
                 <Link to="/login" className="font-medium text-brand-500 hover:text-brand-400">
                   Sign in
