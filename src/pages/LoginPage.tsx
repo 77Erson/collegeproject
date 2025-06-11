@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { Google } from 'lucide-react';
+import { Chrome } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface LoginFormData {
@@ -130,7 +130,7 @@ const LoginPage = () => {
                 className="w-full" 
                 onClick={handleGoogleSignIn}
               >
-                <Google className="mr-2 h-4 w-4" />
+                <Chrome className="mr-2 h-4 w-4" />
                 Sign in with Google
               </Button>
             </CardContent>
